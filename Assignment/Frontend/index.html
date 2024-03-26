@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>University Search</title>
+    <link href="/bootstrap/bootstrap.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>University Search</h1>
+      <form id="searchForm">
+        <div class="mb-3">
+          <label for="searchTerm" class="form-label"
+            >Search for a University</label
+          >
+          <input
+            type="search"
+            class="form-control"
+            id="searchTerm"
+            name="searchTerm"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+
+      <div id="resultContainer" class="mt-3">
+        <table>
+          <thead>
+            <tr>
+              <td>name</td>
+              <td>state-province</td>
+              <td>web_pages</td>
+              <td>Add to Favourite</td>
+            </tr>
+          </thead>
+          <tbody id="result"> 
+              <!-- Results will be displayed here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/bootstrap/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+<script>
+  let searchForm = document.getElementById("searchForm");
+  searchForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const searchTerm = document.getElementById("searchTerm").value.trim();
+
+    try {
+      const response = await fetch(
+        `http://universities.hipolabs.com/search?name=${searchTerm}&country=india`
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      //   console.log(data);
+      displayUniversity(data);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
+  });
+
+//   let container = document.getElementById("results");
+  let tbody = document.getElementById("result");
+  const displayUniversity = (data) => {
+    tbody.innerHTML = null;
+    data.forEach((element) => {
+      // console.log(element);
+      let tr = document.createElement("tr")
+      let name = document.createElement("td")
+      name.innerText = element.name
+      let country = document.createElement("td")
+      country.innerText = element.country
+      let website = document.createElement("a")
+      website.href = element.web_pages
+      website.innerText = element.web_pages
+      let btn = document.createElement("button")
+      btn.innerText = "Add to Favourite"
+      btn.addEventListener("click",()=>{
+        handleClick(element)
+
+      })
+      tr.append(name,country,website,btn)
+      tbody.append(tr)
+    });
+  };
+  let handleClick = async (data) => {
+  let res = await fetch('http://localhost:8080/favuniversity', {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  let mydata = await res.json();
+  console.log(data);
+}
+
+</script>
